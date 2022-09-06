@@ -18,6 +18,7 @@ const userCntrls = {
 
     if (!user)
       return res.status(403).json({ message: "Invalid Authentication" });
+
     const { id } = req.params;
 
     const newProfile = await User.findById(id).select("-salt -hash");

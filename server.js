@@ -10,8 +10,6 @@ const errorCntrls = require("./controllers/errorCntrls");
 
 const app = express();
 
-// console.log("working?")s
-
 app.use(express.json());
 app.use(cors());
 if (process.env !== "production") {
@@ -23,7 +21,6 @@ app.use(cookieParser());
 const debug = require("debug")(process.env.DEBUG);
 
 require("./config/database");
-
 //ROUTES
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);

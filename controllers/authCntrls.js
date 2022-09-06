@@ -50,6 +50,7 @@ const authCntrls = {
         hash,
         country,
       };
+
       const user = new User(userData);
 
       const accessToken = createAccessToken({ id: user._id });

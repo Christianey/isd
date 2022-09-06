@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
   {
-    fullName: {
+    name: {
       type: String,
       required: true,
       trim: true,
-      maxLength: 25,
+      maxLength: 30,
     },
     username: {
       type: String,
@@ -29,21 +29,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    avatar: {
+    country: {
       type: String,
-      default: "", //cloudinary link to default avatar picture
+      required: true,
     },
-    role: { type: String, default: "user" },
-    gender: { type: String, default: "male" },
-    address: { type: String, default: "" },
-    website: { type: String, default: "" },
-    story: {
-      type: String,
-      default: "",
-      maxLength: 200,
-    },
-    followers: [{ type: mongoose.SchemaTypes.ObjectId, ref: "user" }],
-    following: [{ type: mongoose.SchemaTypes.ObjectId, ref: "user" }],
   },
   {
     timestamps: true,

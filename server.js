@@ -10,7 +10,7 @@ const errorCntrls = require("./controllers/errorCntrls");
 
 const app = express();
 
-console.log("working?")
+// console.log("working?")s
 
 app.use(express.json());
 app.use(cors());

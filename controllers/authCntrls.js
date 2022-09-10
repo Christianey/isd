@@ -7,7 +7,7 @@ const {
   validatePassword,
 } = require("../lib/passwordUtils");
 const { createAccessToken, createRefreshToken } = require("../lib/jwtUtils");
-const User = require("../models/user");
+const User = require("../models/user/user");
 
 const authCntrls = {
   register: async function (req, res, next) {
@@ -83,9 +83,12 @@ const authCntrls = {
           .status(400)
           .json({ message: "Please input username or email and try again." });
 
-      const user =
-        (await User.findOne({ username: emailOrUsername })) ||
-        (await User.findOne({ email: emailOrUsername }));
+      const user = await User.findOne({
+        $or: [
+          { email: { $regex: emailOrUsername, $options: "i" } },
+          { username: { $regex: emailOrUsername, $options: "i" } },
+        ],
+      });
 
       if (!user) {
         return res
@@ -109,7 +112,7 @@ const authCntrls = {
       res.json({
         message: "Login successful!",
         accessToken,
-        user,
+        user: { ...user._doc, salt: null, hash: null },
       });
     } catch (error) {
       next(error);
@@ -150,7 +153,7 @@ const authCntrls = {
 
           res.json({
             accessToken,
-            user,
+            user: { ...user._doc, salt: null, hash: null },
           });
         }
       );

@@ -1,9 +1,10 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const User = require("../models/user/user");
 
 const auth = async (req, res, next) => {
   const { authorization } = req.headers;
+  console.log(req.headers);
   if (!authorization)
     return res.status(403).json({ message: "Invalid Authentication" });
 

@@ -33,6 +33,15 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    referralCode: {
+      type: String,
+    },
+    wallet: {
+      type: mongoose.Schema.Types.Mixed,
+    },
+    availableBalance: {
+      type: Number,
+    },
   },
   {
     timestamps: true,

@@ -1,13 +1,7 @@
 const mongoose = require("mongoose");
 
-const userSchema = mongoose.Schema(
+const adminSchema = mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      maxLength: 30,
-    },
     username: {
       type: String,
       required: true,
@@ -29,18 +23,9 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    country: {
-      type: String,
-      required: true,
-    },
-    referralCode: {
-      type: String,
-    },
-    wallet: {
-      type: mongoose.Schema.Types.Mixed,
-    },
-    availableBalance: {
-      type: Number,
+    isAdmin: {
+      type: Boolean,
+      default: true,
     },
   },
   {
@@ -48,4 +33,4 @@ const userSchema = mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("admin", adminSchema);

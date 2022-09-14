@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const { authRoutes } = require("./routes/authRoutes");
+const { adminRoutes } = require("./routes/adminRoutes");
 const { userRoutes } = require("./routes/userRoutes");
 const errorCntrls = require("./controllers/errorCntrls");
 
@@ -26,6 +27,7 @@ require("./config/database");
 //ROUTES
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
+app.use("/api", adminRoutes);
 
 //ERROR CONTROLLER
 app.use(errorCntrls);

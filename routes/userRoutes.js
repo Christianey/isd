@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const auth = require("../middleware/auth");
 const userCntrls = require("../controllers/userCntrls");
+const { adminAuthMiddleware, isAdmin } = require("../middleware/auth");
 
-router.get("/user/:id", auth, userCntrls.getUser);
-router.get("/users", auth, userCntrls.getAllUsers);
+router.get("/users", adminAuthMiddleware, isAdmin, userCntrls.getAllUsers);
+router.get("/user/:id", adminAuthMiddleware, isAdmin, userCntrls.getUser);
 
 module.exports.userRoutes = router;

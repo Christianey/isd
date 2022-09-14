@@ -1,9 +1,13 @@
 const router = require("express").Router();
 const authCntrls = require("../controllers/authCntrls");
 
-router.post("/register", authCntrls.register);
+router.post("/register", authCntrls.registerUser);
 
-router.post("/login", authCntrls.login);
+router.post("/login", authCntrls.loginUser);
+
+router.post("/register_admin", authCntrls.registerAdmin);
+
+router.post("/login_admin", authCntrls.loginAdmin);
 
 router.post("/logout", authCntrls.logout);
 

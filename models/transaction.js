@@ -2,28 +2,29 @@ const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
   {
-    userType: {
+    transactionType: {
       type: String,
-      enum: ['WITHDRAWAL', 'DEPOSIT', 'BONUS']
+      enum: ["WITHDRAWAL", "DEPOSIT"],
+    },
+    sender: {
+      type: String,
+      ref: "User",
     },
     status: {
       type: String,
-      enum: ['VERIFIED', 'PENDING', "ACTIVE"],
-      default: 'PENDING'
+      enum: ["VERIFIED", "PENDING", "ACTIVE"],
+      default: "PENDING",
     },
     amount: {
       type: Number,
     },
-    availableBalance: {
-      type: Number,
+    requestedOn: {
+      type: Date,
+      default: Date.now,
     },
-    referredBy: {
-      type: mongoose.Schema.Types.ObjectId
+    paidOn: {
+      type: Date,
     },
-    maxDailyWithdrawal: {
-      type: Number
-    }
-    
   },
   {
     timestamps: true,

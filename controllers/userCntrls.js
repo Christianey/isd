@@ -3,18 +3,14 @@ const debug = require("debug")(process.env.DEBUG);
 
 const userCntrls = {
   getUser: async (req, res) => {
-    const { user } = req;
-
-    if (!user)
-      return res.status(403).json({ message: "Invalid Authentication" });
-
     const { id } = req.params;
 
-    const profile = await User.findById(id).select("-salt -hash");
-    if (!profile)
-      return res.status(400).json({ message: "User doesn't exist." });
+    const user = await User.findById(id).select("-salt -hash");
+    console.log(user?.bookBalance);
 
-    res.json({ user: profile });
+    if (!user) return res.status(400).json({ message: "User doesn't exist." });
+
+    res.json({ user });
   },
 
   getAllUsers: async (req, res) => {

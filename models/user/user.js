@@ -23,7 +23,8 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["ACTIVE", "DEACTIVATED"]
+      enum: ["ACTIVE", "DEACTIVATED"],
+      default: "ACTIVE",
     },
     salt: {
       type: String,
@@ -43,20 +44,35 @@ const userSchema = mongoose.Schema(
     wallet: {
       type: mongoose.Schema.Types.Mixed,
     },
+    liveProfit: {
+      type: Number,
+      default: 0,
+    },
     availableBalance: {
       type: Number,
+      default: 0,
     },
     referredBy: {
-      type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.ObjectId,
     },
     maxDailyWithdrawal: {
-      type: Number
-    }
+      type: Number,
+    },
 
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+userSchema.virtual("bookBalance").get(function () {
+  return this.availableBalance + this.liveProfit;
+});
 
 module.exports = mongoose.model("user", userSchema);

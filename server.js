@@ -8,6 +8,7 @@ const { authRoutes } = require("./routes/authRoutes");
 const { adminRoutes } = require("./routes/adminRoutes");
 const { userRoutes } = require("./routes/userRoutes");
 const errorCntrls = require("./controllers/errorCntrls");
+const { generatePasswordHash } = require("./lib/passwordUtils");
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.use(cookieParser());
 const debug = require("debug")(process.env.DEBUG);
 
 require("./config/database");
-
+// debug(generatePasswordHash("12345678"))
 //ROUTES
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);

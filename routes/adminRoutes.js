@@ -8,5 +8,11 @@ router.patch(
   isAdmin,
 editUserNameAndPassword
 );
+router.patch(
+  "/update_company_details",
+  adminAuthMiddleware,
+  isAdmin,
+editUserNameAndPassword
+);
 
 module.exports.adminRoutes = router;

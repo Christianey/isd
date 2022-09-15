@@ -33,8 +33,9 @@ const authCntrls = {
 
       const newEmail = await User.findOne({ email });
 
-      if (newEmail)
+      if (newEmail) {
         return res.status(400).json({ message: "Email already in use" });
+      }
 
       if (password < 6)
         return res
@@ -83,63 +84,63 @@ const authCntrls = {
     try {
       const { username, email, password } = req.body;
 
-      if (!username || !email || !password)
+      if (!username || !email || !password) {
         return res
           .status(400)
           .json({ message: "Please input all required fields." });
+      } else {
+        if (username.trim().includes(" ")) {
+          return res
+            .status(400)
+            .json({ message: "username must not contain spaces" });
+        }
 
-      if (username.trim().includes(" ")) {
-        return res
-          .status(400)
-          .json({ message: "username must not contain spaces" });
+        const newUsername = await Admin.findOne({ username });
+        const newEmail = await Admin.findOne({ email });
+
+        if (newUsername) {
+          return res.status(400).json({ message: "Username already in use" });
+        } else if (newEmail) {
+          return res.status(400).json({ message: "Email already in use" });
+        } else {
+          if (password < 6)
+            return res
+              .status(400)
+              .json({ message: "Password must be at least 6 characters" });
+
+          const { salt, hash } = generatePasswordHash(password);
+
+          const adminData = {
+            username,
+            email,
+            salt,
+            hash,
+            isAdmin: true,
+          };
+
+          const admin = new Admin(adminData);
+
+          const accessToken = createAccessToken({
+            id: admin._id,
+            isAdmin: admin.isAdmin,
+          });
+          const refreshToken = createRefreshToken({ id: admin._id });
+
+          res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            path: "/api/refresh_token",
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+          });
+
+          await admin.save();
+
+          res.json({
+            message: " Admin Registration Successful!",
+            accessToken,
+            admin: { ...admin._doc, salt: null, hash: null },
+          });
+        }
       }
-
-      const newUsername = await User.findOne({ username });
-
-      if (newUsername)
-        return res.status(400).json({ message: "Username already in use" });
-
-      const newEmail = await User.findOne({ email });
-
-      if (newEmail)
-        return res.status(400).json({ message: "Email already in use" });
-
-      if (password < 6)
-        return res
-          .status(400)
-          .json({ message: "Password must be at least 6 characters" });
-
-      const { salt, hash } = generatePasswordHash(password);
-
-      const adminData = {
-        username,
-        email,
-        salt,
-        hash,
-        isAdmin: true,
-      };
-
-      const admin = new Admin(adminData);
-
-      const accessToken = createAccessToken({
-        id: admin._id,
-        isAdmin: admin.isAdmin,
-      });
-      const refreshToken = createRefreshToken({ id: admin._id });
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        path: "/api/refresh_token",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
-
-      await admin.save();
-
-      res.json({
-        message: " Admin Registration Successful!",
-        accessToken,
-        admin: { ...admin._doc, salt: null, hash: null },
-      });
     } catch (error) {
       next(error);
     }

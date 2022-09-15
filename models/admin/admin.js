@@ -15,6 +15,19 @@ const adminSchema = mongoose.Schema(
       unique: true,
       trim: true,
     },
+    companyInfo: {
+      default: {
+        name: "",
+        email: "",
+        officeAddress: "",
+        phoneNumber: "",
+        bitcoinAddress: "",
+        ethereumAddress: "",
+        minWithdrawal: 0,
+        maxWithdrawal: 0,
+      },
+      type: Object,
+    },
     salt: {
       type: String,
       required: true,

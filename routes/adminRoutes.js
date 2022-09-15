@@ -1,18 +1,16 @@
 const router = require("express").Router();
-const {editUserNameAndPassword} = require("../controllers/adminCntrls");
+const {
+  updateLoginDetails,
+  updateCompanyInfo,
+} = require("../controllers/adminCntrls");
 const { adminAuthMiddleware, isAdmin } = require("../middleware/auth");
 
+router.patch("/update_admin", adminAuthMiddleware, isAdmin, updateLoginDetails);
 router.patch(
-  "/update_admin",
+  "/update_company_info",
   adminAuthMiddleware,
   isAdmin,
-editUserNameAndPassword
-);
-router.patch(
-  "/update_company_details",
-  adminAuthMiddleware,
-  isAdmin,
-editUserNameAndPassword
+  updateCompanyInfo
 );
 
 module.exports.adminRoutes = router;

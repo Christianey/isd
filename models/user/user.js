@@ -1,12 +1,14 @@
+const Joi = require("joi");
 const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Name of user is required"],
       trim: true,
-      maxLength: 30,
+      minLength: [4, "name length must be more than 4, got {VALUE}"],
+      maxLength: [30, "name length must be less than 30, got {VALUE}"],
     },
     username: {
       type: String,
@@ -25,6 +27,7 @@ const userSchema = mongoose.Schema(
       type: String,
       enum: ["ACTIVE", "DEACTIVATED"],
       default: "ACTIVE",
+      message: "{VALUE} is not supported",
     },
     salt: {
       type: String,
@@ -58,7 +61,9 @@ const userSchema = mongoose.Schema(
     maxDailyWithdrawal: {
       type: Number,
     },
-
+    transactions: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Transactions" },
+    ],
     isAdmin: {
       type: Boolean,
       default: false,
@@ -75,4 +80,15 @@ userSchema.virtual("bookBalance").get(function () {
   return this.availableBalance + this.liveProfit;
 });
 
-module.exports = mongoose.model("user", userSchema);
+const User = mongoose.model("user", userSchema);
+
+const userValidateCreate = (user) => {
+  const schema = Joi.object({});
+
+  return schema.validate(user);
+};
+
+module.exports = {
+  User,
+  userValidateCreate,
+};

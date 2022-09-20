@@ -8,7 +8,7 @@ const {
 } = require("../lib/passwordUtils");
 const { createAccessToken, createRefreshToken } = require("../lib/jwtUtils");
 const User = require("../models/user/user");
-const Admin = require("../models/admin/admin");
+const { Admin } = require("../models/admin/admin");
 
 const authCntrls = {
   registerUser: async function (req, res, next) {

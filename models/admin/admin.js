@@ -29,13 +29,15 @@ const companyInfoSchema = mongoose.Schema({
   maxWithdrawal: {
     type: Number,
   },
-  depositCharge: {
-    type: Number,
-    default: 0,
-  },
-  withdrawalCharge: {
-    type: Number,
-    default: 1,
+  charges: {
+    depositCharge: {
+      type: Number,
+      default: 0,
+    },
+    withdrawalCharge: {
+      type: Number,
+      default: 1,
+    },
   },
 });
 
@@ -74,6 +76,7 @@ const adminSchema = mongoose.Schema(
         ethereumAddress: "",
         minWithdrawal: 0,
         maxWithdrawal: 0,
+        charges: { withdrawal: 0, deposit: 0 },
       },
       type: Object,
     },
@@ -145,9 +148,10 @@ const validateAdminUpdate = (admin) => {
 
 const validateCharges = (charges) => {
   const schema = Joi.object({
-    deposit: Joi.number().positive(),
-    withdrawal: Joi.number().positive().required,
-  }).or("deposit", "withdrawal");
+    deposit: Joi.number().positive().required(),
+    withdrawal: Joi.number().positive().required(),
+    adminId: Joi.string().hex().length(24).required(),
+  });
 
   return schema.validate(charges);
 };

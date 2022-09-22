@@ -18,12 +18,17 @@ const adminCntrls = {
       if (!(username && currentPassword && newPassword && id))
         res.json({ message: "Please input all required fields" });
 
-      const adminExists = await Admin.findOne({ username });
+      const adminExists = await Admin.findOne({
+        $or: [
+          { email: { $regex: emailOrUsername, $options: "i" } },
+          { username: { $regex: emailOrUsername, $options: "i" } },
+        ],
+      });
 
       if (adminExists) {
-        res
+        return res
           .status(400)
-          .json({ message: "Username already exists. Try again..." });
+          .json({ message: "Username or email already exists. Try again..." });
       } else {
         const admin = await Admin.findById(id);
         const { salt: currentSalt, hash: currentHash } = admin;
@@ -316,73 +321,104 @@ const adminCntrls = {
   },
 
   sendBonus: async (req, res, next) => {
-    const { username, amount, adminId } = req.body;
+    try {
+      const { username, amount, adminId } = req.body;
 
-    const user = await User.findOne({ username });
+      const user = await User.findOne({ username }).select("-salt -hash");
 
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: `User with username ${username} doesn't exist` });
-    } else {
-      const newTransaction = new Transaction({
-        transactionType: "BONUS",
-        status: "PENDING",
-        amount: amount,
-        sender: adminId,
-        requestedOn: Date.now(),
-        paidOn: Date.now(),
-      });
+      if (!user) {
+        return res
+          .status(400)
+          .json({ message: `User with username ${username} doesn't exist` });
+      } else {
+        const newTransaction = new Transaction({
+          transactionType: "BONUS",
+          status: "PENDING",
+          amount: amount,
+          sender: adminId,
+          requestedOn: Date.now(),
+          paidOn: Date.now(),
+        });
 
-      const transaction = await newTransaction.save();
-      const { _id: transactionId } = transaction;
+        const transaction = await newTransaction.save();
+        const { _id: transactionId } = transaction;
 
-      user.availableBalance += amount;
-      user.transactions = [...user.transactions, transactionId];
-      const result = await user.save();
+        user.availableBalance += amount;
+        user.transactions = [...user.transactions, transactionId];
+        const result = await user.save();
 
-      res.json({
-        message: "Bonus sent successfully!",
-        result: { ...result._doc, hash: null, salt: null },
-      });
+        res.json({
+          message: "Bonus sent successfully!",
+          result,
+        });
+      }
+    } catch (error) {
+      next(error);
     }
   },
 
   sendPenalty: async (req, res, next) => {
-    const { username, amount, adminId } = req.body;
+    try {
+      const { username, amount, adminId } = req.body;
 
-    const user = await User.findOne({ username });
+      const user = await User.findOne({ username }).select("-salt -hash");
 
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: `User with username ${username} doesn't exist` });
-    } else {
-      const newTransaction = new Transaction({
-        transactionType: "PENALTY",
-        status: "PENDING",
-        amount: amount,
-        sender: adminId,
-        requestedOn: Date.now(),
-        paidOn: Date.now(),
-      });
+      if (!user) {
+        return res
+          .status(400)
+          .json({ message: `User with username ${username} doesn't exist` });
+      } else {
+        const newTransaction = new Transaction({
+          transactionType: "PENALTY",
+          status: "PENDING",
+          amount: amount,
+          sender: adminId,
+          requestedOn: Date.now(),
+          paidOn: Date.now(),
+        });
 
-      const transaction = await newTransaction.save();
-      const { _id: transactionId } = transaction;
+        const transaction = await newTransaction.save();
+        const { _id: transactionId } = transaction;
 
-      user.availableBalance += -amount;
-      user.transactions = [...user.transactions, transactionId];
-      const result = await user.save();
+        user.availableBalance += -amount;
+        user.transactions = [...user.transactions, transactionId];
+        const result = await user.save();
 
-      res.json({
-        message: "Penalty sent successfully!",
-        result: { ...result._doc, hash: null, salt: null },
-      });
+        res.json({
+          message: "Penalty sent successfully!",
+          result,
+        });
+      }
+    } catch (error) {
+      next(error);
     }
   },
 
   //Set Charges
-  setCharges: async (req, res, next) => {},
+  setCharges: async (req, res, next) => {
+    try {
+      const { adminId, withdrawal, deposit } = req.body;
+
+      const admin = await Admin.findByIdAndUpdate(
+        adminId,
+        {
+          email: "Nano@gmail.com",
+          $set: {
+            "companyInfo.charges.withdrawal": withdrawal,
+            "companyInfo.charges.deposit": deposit,
+          },
+        },
+        { new: true }
+      ).select("-hash -salt");
+
+      if (!admin)
+        return res.status(400).json({ message: "Admin doesn't exist" });
+
+      res.json({ message: "okay", result: admin });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 module.exports = adminCntrls;

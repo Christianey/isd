@@ -116,7 +116,7 @@ router.post(
 );
 
 //Set Charges
-router.post(
+router.put(
   "/set_charges",
   adminAuthMiddleware,
   isAdmin,

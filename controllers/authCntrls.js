@@ -7,7 +7,7 @@ const {
   validatePassword,
 } = require("../lib/passwordUtils");
 const { createAccessToken, createRefreshToken } = require("../lib/jwtUtils");
-const User = require("../models/user/user");
+const { User } = require("../models/user/user");
 const { Admin } = require("../models/admin/admin");
 
 const authCntrls = {
@@ -209,7 +209,6 @@ const authCntrls = {
           { username: { $regex: emailOrUsername, $options: "i" } },
         ],
       });
-      console.log({ admin });
 
       if (!admin) {
         return res

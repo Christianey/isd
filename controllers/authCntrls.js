@@ -18,29 +18,29 @@ const authCntrls = {
       if (!name || !username || !email || !password || !country)
         return res
           .status(400)
-          .json({ message: "Please input all required fields." });
+          .json({ error: "Please input all required fields." });
 
       if (username.trim().includes(" ")) {
         return res
           .status(400)
-          .json({ message: "username must not contain spaces" });
+          .json({ error: "username must not contain spaces" });
       }
 
       const newUsername = await User.findOne({ username });
 
       if (newUsername)
-        return res.status(400).json({ message: "Username already in use" });
+        return res.status(400).json({ error: "Username already in use" });
 
       const newEmail = await User.findOne({ email });
 
       if (newEmail) {
-        return res.status(400).json({ message: "Email already in use" });
+        return res.status(400).json({ error: "Email already in use" });
       }
 
       if (password < 6)
         return res
           .status(400)
-          .json({ message: "Password must be at least 6 characters" });
+          .json({ error: "Password must be at least 6 characters" });
 
       const { salt, hash } = generatePasswordHash(password);
 
@@ -87,26 +87,26 @@ const authCntrls = {
       if (!username || !email || !password) {
         return res
           .status(400)
-          .json({ message: "Please input all required fields." });
+          .json({ error: "Please input all required fields." });
       } else {
         if (username.trim().includes(" ")) {
           return res
             .status(400)
-            .json({ message: "username must not contain spaces" });
+            .json({ error: "username must not contain spaces" });
         }
 
         const newUsername = await Admin.findOne({ username });
         const newEmail = await Admin.findOne({ email });
 
         if (newUsername) {
-          return res.status(400).json({ message: "Username already in use" });
+          return res.status(400).json({ error: "Username already in use" });
         } else if (newEmail) {
-          return res.status(400).json({ message: "Email already in use" });
+          return res.status(400).json({ error: "Email already in use" });
         } else {
           if (password < 6)
             return res
               .status(400)
-              .json({ message: "Password must be at least 6 characters" });
+              .json({ error: "Password must be at least 6 characters" });
 
           const { salt, hash } = generatePasswordHash(password);
 
@@ -153,7 +153,7 @@ const authCntrls = {
       if (!emailOrUsername)
         return res
           .status(400)
-          .json({ message: "Please input username or email and try again." });
+          .json({ error: "Please input username or email and try again." });
 
       const user = await User.findOne({
         $or: [
@@ -169,7 +169,7 @@ const authCntrls = {
       }
 
       if (!validatePassword(password, user.salt, user.hash)) {
-        return res.status(400).json({ message: "Invalid password." });
+        return res.status(400).json({ error: "Invalid password." });
       }
 
       const accessToken = createAccessToken({
@@ -201,7 +201,7 @@ const authCntrls = {
       if (!emailOrUsername)
         return res
           .status(400)
-          .json({ message: "Please input username or email and try again." });
+          .json({ error: "Please input username or email and try again." });
 
       const admin = await Admin.findOne({
         $or: [
@@ -213,11 +213,11 @@ const authCntrls = {
       if (!admin) {
         return res
           .status(400)
-          .json({ message: "Username or email doesn't exist." });
+          .json({ error: "Username or email doesn't exist." });
       }
 
       if (!validatePassword(password, admin.salt, admin.hash)) {
-        return res.status(400).json({ message: "Invalid password." });
+        return res.status(400).json({ error: "Invalid password." });
       }
 
       const accessToken = createAccessToken({
@@ -257,20 +257,20 @@ const authCntrls = {
   generateAccessToken: async function (req, res, next) {
     try {
       const refreshToken = req.cookies.refreshToken;
-      if (!refreshToken) return res.status(400).json({ msg: "Please login." });
+      if (!refreshToken) return res.status(400).json({ error: "Please login." });
 
       jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET,
         async (error, { id }) => {
-          if (error) return res.status(400).json({ msg: "Please login." });
+          if (error) return res.status(400).json({ error: "Please login." });
 
           const user = await User.findById(id)
             .select("-hash -salt")
             .populate("followers following", "-hash -salt");
 
           if (!user)
-            return res.status(400).json({ msg: "User doesn't exist." });
+            return res.status(400).json({ error: "User doesn't exist." });
 
           const accessToken = createAccessToken({ id: user._id });
 

@@ -28,7 +28,7 @@ const adminCntrls = {
       if (adminExists) {
         return res
           .status(400)
-          .json({ message: "Username or email already exists. Try again..." });
+          .json({ error: "Username or email already exists. Try again..." });
       } else {
         const admin = await Admin.findById(id);
         const { salt: currentSalt, hash: currentHash } = admin;
@@ -39,7 +39,7 @@ const adminCntrls = {
         );
 
         if (!isPasswordValid) {
-          res.status(400).json({ message: "Wrong current password" });
+          res.status(400).json({ error: "Wrong current password" });
         } else {
           const { salt: newSalt, hash: newHash } =
             generatePasswordHash(newPassword);
@@ -63,7 +63,7 @@ const adminCntrls = {
       const admin = await Admin.findById(adminId);
 
       if (!admin) {
-        res.status(400).json({ message: "Admin doesn't exist" });
+        res.status(400).json({ error: "Admin doesn't exist" });
       } else {
         admin.companyInfo = {
           ...admin.companyInfo,
@@ -102,7 +102,7 @@ const adminCntrls = {
       const { depositPlanId } = req.params;
 
       if (!depositPlanId) {
-        return res.status(400).json({ message: "No deposit plan id" });
+        return res.status(400).json({ error: "No deposit plan id" });
       } else {
         const result = await DepositPlan.findById(depositPlanId);
         res.json({ message: "Deposit plan retrieved successfully!", result });
@@ -126,7 +126,7 @@ const adminCntrls = {
       const { depositPlanId } = req.params;
 
       if (!depositPlanId) {
-        return res.status(400).json({ message: "No deposit plan id" });
+        return res.status(400).json({ error: "No deposit plan id" });
       } else {
         const result = await DepositPlan.findByIdAndUpdate(
           depositPlanId,
@@ -134,9 +134,7 @@ const adminCntrls = {
         );
 
         if (!depositPlan) {
-          return res
-            .status(400)
-            .json({ message: "Deposit plan doesn't exist" });
+          return res.status(400).json({ error: "Deposit plan doesn't exist" });
         }
 
         res.json({ mesage: "Deposit Plan updated successfully!", result });
@@ -169,13 +167,12 @@ const adminCntrls = {
     try {
       const { FAQId } = req.params;
 
-      if (!FAQId)
-        return res.status(400).json({ message: "Please pass FAQ Id" });
+      if (!FAQId) return res.status(400).json({ error: "Please pass FAQ Id" });
 
       const result = await FAQ.findByIdAndDelete(id);
 
       if (!result) {
-        return res.status(400).json({ message: "FAQ Id doesn't exist..." });
+        return res.status(400).json({ error: "FAQ Id doesn't exist..." });
       } else {
         res.json({ message: "FAQ deleted successfully!", result });
       }
@@ -188,13 +185,12 @@ const adminCntrls = {
     try {
       const { FAQId } = req.params;
 
-      if (!FAQId)
-        return res.status(400).json({ message: "Please pass FAQ Id" });
+      if (!FAQId) return res.status(400).json({ error: "Please pass FAQ Id" });
 
       const result = await FAQ.findById(id);
 
       if (!result) {
-        return res.status(400).json({ message: "Id doesn't exist..." });
+        return res.status(400).json({ error: "Id doesn't exist..." });
       } else {
         res.json({ message: "Get FAQ Successful!", result });
       }
@@ -217,12 +213,12 @@ const adminCntrls = {
       const { FAQId } = req.params;
 
       if (!FAQId) {
-        return res.status(400).json({ message: "No FAQ plan id" });
+        return res.status(400).json({ error: "No FAQ plan id" });
       } else {
         const result = await FAQ.findByIdAndUpdate(FAQId, req.body);
 
         if (!FAQ) {
-          return res.status(400).json({ message: "FAQ doesn't exist" });
+          return res.status(400).json({ error: "FAQ doesn't exist" });
         }
 
         res.json({ message: "FAQ updated successfully!", result });
@@ -256,14 +252,14 @@ const adminCntrls = {
       const { TestimonialId } = req.params;
 
       if (!TestimonialId)
-        return res.status(400).json({ message: "Please pass Testimonial Id" });
+        return res.status(400).json({ error: "Please pass Testimonial Id" });
 
       const result = await Testimonial.findByIdAndDelete(id);
 
       if (!result) {
         return res
           .status(400)
-          .json({ message: "Testimonial Id doesn't exist..." });
+          .json({ error: "Testimonial Id doesn't exist..." });
       } else {
         res.json({ message: "Testimonial deleted successfully!", result });
       }
@@ -277,12 +273,12 @@ const adminCntrls = {
       const { TestimonialId } = req.params;
 
       if (!TestimonialId)
-        return res.status(400).json({ message: "Please pass Testimonial Id" });
+        return res.status(400).json({ error: "Please pass Testimonial Id" });
 
       const result = await Testimonial.findById(id);
 
       if (!result) {
-        return res.status(400).json({ message: "Id doesn't exist..." });
+        return res.status(400).json({ error: "Id doesn't exist..." });
       } else {
         res.json({ message: "Get Testimonial Successful!", result });
       }
@@ -305,12 +301,12 @@ const adminCntrls = {
       const { testimonialId } = req.params;
 
       if (!testimonialId) {
-        return res.status(400).json({ message: "No testimonial id" });
+        return res.status(400).json({ error: "No testimonial id" });
       } else {
         const result = await FAQ.findByIdAndUpdate(testimonialId, req.body);
 
         if (!FAQ) {
-          return res.status(400).json({ message: "Testimonial doesn't exist" });
+          return res.status(400).json({ error: "Testimonial doesn't exist" });
         }
 
         res.json({ message: "Testimonial updated successfully!", result });
@@ -329,7 +325,7 @@ const adminCntrls = {
       if (!user) {
         return res
           .status(400)
-          .json({ message: `User with username ${username} doesn't exist` });
+          .json({ error: `User with username ${username} doesn't exist` });
       } else {
         const newTransaction = new Transaction({
           transactionType: "BONUS",
@@ -366,7 +362,7 @@ const adminCntrls = {
       if (!user) {
         return res
           .status(400)
-          .json({ message: `User with username ${username} doesn't exist` });
+          .json({ error: `User with username ${username} doesn't exist` });
       } else {
         const newTransaction = new Transaction({
           transactionType: "PENALTY",
@@ -411,10 +407,9 @@ const adminCntrls = {
         { new: true }
       ).select("-hash -salt");
 
-      if (!admin)
-        return res.status(400).json({ message: "Admin doesn't exist" });
+      if (!admin) return res.status(400).json({ error: "Admin doesn't exist" });
 
-      res.json({ message: "okay", result: admin });
+      res.json({ message: "Set charges Successful!", result: admin });
     } catch (error) {
       next(error);
     }

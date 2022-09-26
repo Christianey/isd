@@ -2,6 +2,7 @@ const {
   validatePassword,
   generatePasswordHash,
 } = require("../lib/passwordUtils");
+const { Transaction } = require("../models/transaction");
 const { User } = require("../models/user/user");
 const debug = require("debug")(process.env.DEBUG);
 
@@ -12,8 +13,7 @@ const userCntrls = {
 
       const user = await User.findById(id).select("-salt -hash");
 
-      if (!user)
-        return res.status(400).json({ message: "User doesn't exist." });
+      if (!user) return res.status(400).json({ error: "User doesn't exist." });
 
       res.json({ user });
     } catch (error) {
@@ -41,7 +41,7 @@ const userCntrls = {
       if (user) {
         return res
           .status(400)
-          .json({ message: "Email already exists. Try again..." });
+          .json({ error: "Email already exists. Try again..." });
       } else {
         const user = await User.findById(userId);
         const { salt: currentSalt, hash: currentHash } = user;
@@ -52,7 +52,7 @@ const userCntrls = {
         );
 
         if (!isPasswordValid) {
-          res.status(400).json({ message: "Wrong current password" });
+          res.status(400).json({ error: "Wrong current password" });
         } else {
           const { salt: newSalt, hash: newHash } =
             generatePasswordHash(newPassword);
@@ -81,37 +81,161 @@ const userCntrls = {
       "DEPOSIT",
     ];
 
-    if (!type) {
-      const { transactions } = await User.findById(userId)
-        .select("transactions")
-        .populate("transactions");
+    try {
+      if (!type) {
+        const { transactions } = await User.findById(userId)
+          .select("transactions")
+          .populate("transactions");
 
-      return res.json({
-        message: `Get Transactions successful!`,
-        result: transactions,
+        return res.json({
+          message: `Get Transactions successful!`,
+          result: transactions,
+        });
+      }
+
+      if (!validTypes.includes(type)) {
+        return res
+          .status(400)
+          .json({ error: "Please input correct transaction type query." });
+      }
+
+      async function handleQuery(type) {
+        const { transactions } = await User.findById(userId)
+          .select("transactions")
+          .populate({
+            path: "transactions",
+            match: { transactionType: type },
+          });
+
+        return res.json({
+          message: `Get ${type} Transactions successful!`,
+          result: transactions,
+        });
+      }
+
+      handleQuery(type);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  makeTransfer: async (req, res, next) => {
+    const { userId, receiverUsername, amount } = req.body;
+
+    try {
+      const sender = await User.findById(userId);
+      const receiver = await User.findOne({ username: receiverUsername });
+
+      if (!sender) {
+        return res.status(400).json({ error: "Sender Id doesn't exist" });
+      }
+
+      if (sender.availableBalance <= 0 || sender.availableBalance <= amount) {
+        return res.status(400).json({ error: "Insufficient funds" });
+      }
+
+      if (!receiver) {
+        return res
+          .status(400)
+          .json({ error: "Receiver Username doesn't exist" });
+      }
+
+      const newTransaction = new Transaction({
+        transactionType: "TRANSFER",
+        status: "PENDING",
+        amount: amount,
+        sender: userId,
+        requestedOn: Date.now(),
+        paidOn: Date.now(),
       });
+
+      sender.availableBalance = sender.availableBalance - amount;
+      receiver.availableBalance = receiver.availableBalance + amount;
+
+      const transaction = await newTransaction.save();
+      const { _id: transactionId } = transaction;
+
+      sender.transactions = [...sender.transactions, transactionId];
+      receiver.transactions = [...receiver.transactions, transactionId];
+
+      await sender.save();
+      await receiver.save();
+
+      res.json({
+        message: "Transfer completed successfully",
+        result: { sender, receiver },
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  addWallet: async (req, res, next) => {
+    const { userId, walletAddress, walletType } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: { wallets: { walletAddress, walletType } },
+      },
+      { new: true }
+    ).select("-hash -salt");
+
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
     }
 
-    if (!validTypes.includes(type)) {
+    res.json({ message: "Add wallet successfull!", result: user });
+  },
+
+  getUserWallets: async (req, res, next) => {
+    const { userId } = req.params;
+
+    if (!userId)
+      return res.status(400).json({ error: "Please add user id parameter" });
+
+    try {
+      const user = await User.findById(userId).select("-hash -salt");
+
+      if (!user) return res.status(400).json({ error: "user not found" });
+
+      res.json({
+        message: "Get user wallets succcessful",
+        result: user.wallets,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  editUserWallet: async (req, res, next) => {
+    const { userId, walletId } = req.params;
+    const { walletType, walletAddress } = req.body;
+
+    if (!userId || !walletId)
       return res
         .status(400)
-        .json({ message: "Please input correct transaction type query." });
-    }
-    async function handleQuery(type) {
-      const { transactions } = await User.findById(userId)
-        .select("transactions")
-        .populate({
-          path: "transactions",
-          match: { transactionType: type },
-        });
+        .json({ error: "Please add user id and wallet id parameters" });
 
-      return res.json({
-        message: `Get ${type} Transactions successful!`,
-        result: transactions,
-      });
-    }
     try {
-      handleQuery(type);
+      const wallet = await User.findOneAndUpdate(
+        { "wallets._id": walletId },
+        {
+          $set: {
+            "wallets.$.walletType": walletType,
+            "wallet.$.walletAddress": walletAddress,
+          },
+        },
+        { new: true }
+      );
+
+      if (!wallet)
+        return res.status(400).json({ error: "User or wallet doesn't exist" });
+
+      res.json({
+        message: "Edit user wallet succcessful",
+        result: wallet,
+      });
     } catch (error) {
       next(error);
     }

@@ -39,6 +39,9 @@ const companyInfoSchema = mongoose.Schema({
       default: 1,
     },
   },
+  systemBalance: {
+    type: Number,
+  },
 });
 
 const adminSchema = mongoose.Schema(

@@ -52,7 +52,7 @@ const validateTransactionCreate = (transaction) => {
     requestedOn: Joi.date().required(),
     paidOn: Joi.date().required(),
   })
-    .xor(
+    .or(
       "transactionType",
       "status",
       "sender",
@@ -69,7 +69,7 @@ const validateReward = (transaction) => {
   const schema = Joi.object({
     username: Joi.string().required().trim(),
     amount: Joi.number().required(),
-    adminId: Joi.string().hex().length(24).required()
+    adminId: Joi.string().hex().length(24).required(),
   });
 
   return schema.validate(transaction);

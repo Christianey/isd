@@ -8,7 +8,7 @@ const authMiddlewares = {
     const { authorization } = req.headers;
 
     if (!authorization)
-      return res.status(403).json({ message: "Invalid Authentication" });
+      return res.status(403).json({ error: "Invalid Authentication" });
 
     const { id: userId } = jwt.verify(
       authorization,
@@ -17,7 +17,7 @@ const authMiddlewares = {
 
     const user = await User.findById(userId).select("-hash -salt");
     if (!user)
-      return res.status(403).json({ message: "Invalid Authentication" });
+      return res.status(403).json({ error: "Invalid Authentication" });
 
     req.user = user;
 
@@ -28,7 +28,7 @@ const authMiddlewares = {
       const { authorization } = req.headers;
 
       if (!authorization)
-        return res.status(403).json({ message: "Invalid Authentication" });
+        return res.status(403).json({ error: "Invalid Authentication" });
 
       const { id: adminId } = jwt.verify(
         authorization,
@@ -37,7 +37,7 @@ const authMiddlewares = {
 
       const admin = await Admin.findById(adminId).select("-hash -salt");
       if (!admin)
-        return res.status(403).json({ message: "Invalid Authentication" });
+        return res.status(403).json({ error: "Invalid Authentication" });
 
       req.user = admin;
 

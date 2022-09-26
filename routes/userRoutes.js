@@ -6,7 +6,11 @@ const {
   userAuthMiddleware,
 } = require("../middleware/auth");
 const validate = require("../middleware/validate");
-const { userValidateUpdate } = require("../models/user/user");
+const {
+  userValidateUpdate,
+  userValidateTransfer,
+  userValidateWalletCreate,
+} = require("../models/user/user");
 
 //User CRUD
 router.get("/users", adminAuthMiddleware, isAdmin, userCntrls.getAllUsers);
@@ -18,7 +22,45 @@ router.patch(
   userCntrls.updateUser
 );
 
-//Get User Transaction
-router.get("/transactions/:userId", userAuthMiddleware, userCntrls.getTransactions)
+//Get User Transactions
+router.get(
+  "/transactions/:userId",
+  userAuthMiddleware,
+  userCntrls.getTransactions
+);
+
+//makeTransfer
+router.post(
+  "/transfer",
+  userAuthMiddleware,
+  validate(userValidateTransfer),
+  userCntrls.makeTransfer
+);
+
+//Wallets
+router.post(
+  "/add_wallet",
+  userAuthMiddleware,
+  validate(userValidateWalletCreate),
+  userCntrls.addWallet
+);
+
+router.get(
+  "/get_wallet/:userId",
+  userAuthMiddleware,
+  userCntrls.getUserWallets
+);
+
+router.put(
+  "/edit_wallet/:userId/:walletId",
+  userAuthMiddleware,
+  userCntrls.editUserWallet
+);
+
+router.delete(
+  "/edit_wallet/:userId/:walletId",
+  userAuthMiddleware,
+  userCntrls.getUserWallets
+);
 
 module.exports.userRoutes = router;

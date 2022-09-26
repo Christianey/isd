@@ -44,9 +44,17 @@ const userSchema = mongoose.Schema(
     referralCode: {
       type: String,
     },
-    wallet: {
-      type: mongoose.Schema.Types.Mixed,
-    },
+    wallets: [
+      {
+        walletType: {
+          type: String,
+          enum: ["Bitcoin", "Ethereum", "Litecoin", "Ripple", "USDT"],
+        },
+        walletAddress: {
+          type: String,
+        },
+      },
+    ],
     liveProfit: {
       type: Number,
       default: 0,
@@ -81,6 +89,10 @@ userSchema.virtual("bookBalance").get(function () {
   return this.availableBalance + this.liveProfit;
 });
 
+userSchema.virtual("referralLink").get(function () {
+  return `https://isd.com/signup/?ref=${this.username}`;
+});
+
 const User = mongoose.model("user", userSchema);
 
 const userValidateCreate = (user) => {
@@ -112,8 +124,34 @@ const userValidateUpdate = (user) => {
   return schema.validate(user);
 };
 
+const userValidateTransfer = (user) => {
+  const schema = Joi.object({
+    userId: Joi.string().hex().length(24).required(),
+    receiverUsername: Joi.string().max(25).required(),
+    amount: Joi.number().required(),
+  });
+
+  return schema.validate(user);
+};
+
+const userValidateWalletCreate = (user) => {
+  const schema = Joi.object({
+    userId: Joi.string().hex().length(24).required(),
+    walletType: Joi.string()
+      .required()
+      .valid("Bitcoin", "Ethereum", "Litecoin", "USDT"),
+    walletAddress: Joi.string()
+      .regex(/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/, "Crypto Address")
+      .required(),
+  });
+
+  return schema.validate(user);
+};
+
 module.exports = {
   User,
   userValidateCreate,
   userValidateUpdate,
+  userValidateTransfer,
+  userValidateWalletCreate,
 };

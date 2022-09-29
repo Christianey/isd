@@ -128,7 +128,7 @@ const userValidateTransfer = (user) => {
   const schema = Joi.object({
     userId: Joi.string().hex().length(24).required(),
     receiverUsername: Joi.string().max(25).required(),
-    amount: Joi.number().required(),
+    amount: Joi.number().positive().required(),
   });
 
   return schema.validate(user);
@@ -148,10 +148,26 @@ const userValidateWalletCreate = (user) => {
   return schema.validate(user);
 };
 
+const userValidateMakeWithdrawal = (user) => {
+  const schema = Joi.object({
+    userId: Joi.string().hex().length(24).required(),
+    walletType: Joi.string()
+      .required()
+      .valid("Bitcoin", "Ethereum", "Litecoin", "USDT"),
+    walletAddress: Joi.string()
+      .regex(/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/, "Crypto Address")
+      .required(),
+    amount: Joi.number().positive().required(),
+  });
+
+  return schema.validate(user);
+};
+
 module.exports = {
   User,
   userValidateCreate,
   userValidateUpdate,
   userValidateTransfer,
   userValidateWalletCreate,
+  userValidateMakeWithdrawal,
 };

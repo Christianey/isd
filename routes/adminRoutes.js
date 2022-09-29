@@ -19,6 +19,8 @@ const {
   sendBonus,
   sendPenalty,
   setCharges,
+  getDepositPlanNames,
+  getPaginated,
 } = require("../controllers/adminCntrls");
 const { adminAuthMiddleware, isAdmin } = require("../middleware/auth");
 const {
@@ -48,6 +50,12 @@ router.get(
   adminAuthMiddleware,
   isAdmin,
   getDepositPlan
+);
+router.get(
+  "/get_deposit_plan_names",
+  adminAuthMiddleware,
+  isAdmin,
+  getDepositPlanNames
 );
 router.get("/get_deposit_plans", adminAuthMiddleware, isAdmin, getDepositPlans);
 router.patch(
@@ -123,5 +131,8 @@ router.put(
   validate(validateCharges),
   setCharges
 );
+
+//paginated
+router.get("/paginated", getPaginated);
 
 module.exports.adminRoutes = router;

@@ -30,17 +30,18 @@ const companyInfoSchema = mongoose.Schema({
     type: Number,
   },
   charges: {
-    depositCharge: {
+    deposit: {
       type: Number,
       default: 0,
     },
-    withdrawalCharge: {
+    withdrawal: {
       type: Number,
       default: 1,
     },
   },
   systemBalance: {
     type: Number,
+    default: 0,
   },
 });
 

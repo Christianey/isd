@@ -14,6 +14,12 @@ const transactionSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
     },
+    walletAddress: {
+      type: String,
+    },
+    walletType: {
+      type: String,
+    },
     status: {
       type: String,
       enum: ["VERIFIED", "PENDING", "ACTIVE"],

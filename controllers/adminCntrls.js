@@ -121,6 +121,16 @@ const adminCntrls = {
     }
   },
 
+  getDepositPlanNames: async (req, res, next) => {
+    try {
+      const result = await DepositPlan.distinct("planName");
+
+      res.json({ message: "Get deposit plan names successful", result });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   updateDepositPlan: async (req, res, next) => {
     try {
       const { depositPlanId } = req.params;
@@ -410,6 +420,56 @@ const adminCntrls = {
       if (!admin) return res.status(400).json({ error: "Admin doesn't exist" });
 
       res.json({ message: "Set charges Successful!", result: admin });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  getPaginated: async (req, res, next) => {
+    try {
+      let page = parseInt(req.query.page) - 1 || 0;
+      let limit = parseInt(req.query.limit) || 5;
+      // let search = req.query.search || "";
+      let sort = req.query.sort || "createdAt";
+      let transactionType = req.query.transactionType || "All";
+
+      const transactionTypes = await Transaction.distinct("transactionType");
+
+      // debug(transactionType, 1);
+      transactionType === "All"
+        ? (transactionType = [...transactionTypes])
+        : (transactionType = req.query.transactionType.split(","));
+
+      // debug(transactionType, 2, "DEPOSIT".split(","));
+      req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
+
+      let sortBy = {};
+      sort[1] ? (sortBy[sort[0]] = sort[1]) : (sortBy[sort[0]] = "asc");
+
+      const transactions = await Transaction.find({})
+        .where("transactionType")
+        .in([...transactionType])
+        .sort(sortBy)
+        .skip(page * limit)
+        .limit(limit);
+
+      const total = await Transaction.countDocuments({
+        transactionType: { $in: [...transactionType] },
+      });
+
+      let result = {};
+
+      transactions.length === 0
+        ? (result = {
+            message: "No more documents",
+            transactions,
+          })
+        : (result = {
+            total,
+            page: page + 1,
+            transactions,
+          });
+      res.json(result);
     } catch (error) {
       next(error);
     }

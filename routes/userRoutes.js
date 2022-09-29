@@ -10,6 +10,7 @@ const {
   userValidateUpdate,
   userValidateTransfer,
   userValidateWalletCreate,
+  userValidateMakeWithdrawal,
 } = require("../models/user/user");
 
 //User CRUD
@@ -27,6 +28,34 @@ router.get(
   "/transactions/:userId",
   userAuthMiddleware,
   userCntrls.getTransactions
+);
+
+//Make Withdrawal
+router.post(
+  "/make_withdrawal",
+  userAuthMiddleware,
+  validate(userValidateMakeWithdrawal),
+  userCntrls.makeWithdrawal
+);
+
+router.post(
+  "/make_deposit",
+  userAuthMiddleware,
+  validate(userValidateMakeWithdrawal),
+  userCntrls.makeDeposit
+);
+
+//Get Withdrawal and Deposit charges
+router.get(
+  "/get_withdrawal_charge",
+  userAuthMiddleware,
+  userCntrls.getWithdrawalCharge
+);
+
+router.get(
+  "/get_deposit_charge",
+  userAuthMiddleware,
+  userCntrls.getDepositCharge
 );
 
 //makeTransfer
@@ -58,9 +87,9 @@ router.put(
 );
 
 router.delete(
-  "/edit_wallet/:userId/:walletId",
+  "/delete_wallet/:userId/:walletId",
   userAuthMiddleware,
-  userCntrls.getUserWallets
+  userCntrls.deleteUserWallet
 );
 
 module.exports.userRoutes = router;

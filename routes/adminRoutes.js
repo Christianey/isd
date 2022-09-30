@@ -21,6 +21,8 @@ const {
   setCharges,
   getDepositPlanNames,
   getPaginated,
+  deactivateUser,
+  activateUser,
 } = require("../controllers/adminCntrls");
 const { adminAuthMiddleware, isAdmin } = require("../middleware/auth");
 const {
@@ -33,6 +35,20 @@ const {
   depositPlanValidationUpdate,
 } = require("../models/admin/depositPlan");
 const { validateReward } = require("../models/transaction");
+
+//deactivate & activate user
+router.patch(
+  "/deactivate_user/:userId",
+  adminAuthMiddleware,
+  isAdmin,
+  deactivateUser
+);
+router.patch(
+  "/activate_user/:userId",
+  adminAuthMiddleware,
+  isAdmin,
+  activateUser
+);
 
 //Admin and company info
 router.patch("/update_admin", adminAuthMiddleware, isAdmin, updateLoginDetails);

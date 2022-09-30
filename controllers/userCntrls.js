@@ -12,7 +12,10 @@ const userCntrls = {
     try {
       const { id } = req.params;
 
-      const user = await User.findById(id).select("-salt -hash");
+      const user = await User.findById(id)
+        .select("-salt -hash")
+        .populate("transactions");
+      // const user = await User.aggregate([{ $match: { _id: id } }]);
 
       if (!user) return res.status(400).json({ error: "User doesn't exist." });
 

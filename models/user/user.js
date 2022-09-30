@@ -41,9 +41,6 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    referralCode: {
-      type: String,
-    },
     wallets: [
       {
         walletType: {
@@ -91,6 +88,36 @@ userSchema.virtual("bookBalance").get(function () {
 
 userSchema.virtual("referralLink").get(function () {
   return `https://isd.com/signup/?ref=${this.username}`;
+});
+
+userSchema.virtual("totalDeposit").get(function () {
+  return this.transactions
+    .filter((transaction) => {
+      return transaction?.transactionType === "DEPOSIT";
+    })
+    .reduce((prev, curr) => {
+      return prev + curr.amount;
+    }, 0);
+});
+
+userSchema.virtual("totalWithdrawal").get(function () {
+  return this.transactions
+    .filter((transaction) => {
+      return transaction?.transactionType === "WITHDRAWAL";
+    })
+    .reduce((prev, curr) => {
+      return prev + curr.amount;
+    }, 0);
+});
+
+userSchema.virtual("totalBonuses").get(function () {
+  return this.transactions
+    .filter((transaction) => {
+      return transaction?.transactionType === "BONUS";
+    })
+    .reduce((prev, curr) => {
+      return prev + curr.amount;
+    }, 0);
 });
 
 const User = mongoose.model("user", userSchema);

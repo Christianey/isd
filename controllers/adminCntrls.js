@@ -12,6 +12,38 @@ const { User } = require("../models/user/user");
 const debug = require("debug")(process.env.DEBUG);
 
 const adminCntrls = {
+  deactivateUser: async (req, res, next) => {
+    try {
+      const { userId } = req.params;
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { status: "DEACTIVATED" },
+        { new: true, runValidators: true }
+      );
+
+      if (!user) return res.status(400).json({ error: "User not found." });
+
+      res.json({ message: "User updated successfully.", result: user });
+    } catch (error) {
+      next(error);
+    }
+  },
+  activateUser: async (req, res, next) => {
+    try {
+      const { userId } = req.params;
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { status: "ACTIVE" },
+        { new: true, runValidators: true }
+      );
+
+      if (!user) return res.status(400).json({ error: "User not found." });
+
+      res.json({ message: "User updated successfully.", result: user });
+    } catch (error) {
+      next(error);
+    }
+  },
   updateLoginDetails: async (req, res, next) => {
     try {
       const { username, currentPassword, newPassword, id } = req.body;
@@ -429,9 +461,10 @@ const adminCntrls = {
     try {
       let page = parseInt(req.query.page) - 1 || 0;
       let limit = parseInt(req.query.limit) || 5;
-      // let search = req.query.search || "";
+      let status = req.query.status || "";
       let sort = req.query.sort || "createdAt";
       let transactionType = req.query.transactionType || "All";
+      console.log(status);
 
       const transactionTypes = await Transaction.distinct("transactionType");
 
@@ -446,7 +479,7 @@ const adminCntrls = {
       let sortBy = {};
       sort[1] ? (sortBy[sort[0]] = sort[1]) : (sortBy[sort[0]] = "asc");
 
-      const transactions = await Transaction.find({})
+      const transactions = await Transaction.find({ status })
         .where("transactionType")
         .in([...transactionType])
         .sort(sortBy)
@@ -455,13 +488,14 @@ const adminCntrls = {
 
       const total = await Transaction.countDocuments({
         transactionType: { $in: [...transactionType] },
+        status,
       });
 
       let result = {};
 
       transactions.length === 0
         ? (result = {
-            message: "No more documents",
+            message: "No documents found",
             transactions,
           })
         : (result = {
@@ -469,6 +503,7 @@ const adminCntrls = {
             page: page + 1,
             transactions,
           });
+
       res.json(result);
     } catch (error) {
       next(error);

@@ -461,19 +461,17 @@ const adminCntrls = {
     try {
       let page = parseInt(req.query.page) - 1 || 0;
       let limit = parseInt(req.query.limit) || 5;
-      let status = req.query.status || "";
+      let status = req.query.status || "PENDING";
       let sort = req.query.sort || "createdAt";
       let transactionType = req.query.transactionType || "All";
       console.log(status);
 
       const transactionTypes = await Transaction.distinct("transactionType");
 
-      // debug(transactionType, 1);
       transactionType === "All"
         ? (transactionType = [...transactionTypes])
         : (transactionType = req.query.transactionType.split(","));
 
-      // debug(transactionType, 2, "DEPOSIT".split(","));
       req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort]);
 
       let sortBy = {};

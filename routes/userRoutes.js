@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const userCntrls = require("../controllers/userCntrls");
 const {
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
-  userAuthMiddleware,
+  authMiddleware: userAuthMiddleware,
 } = require("../middleware/auth");
 const validate = require("../middleware/validate");
 const {
@@ -14,8 +14,8 @@ const {
 } = require("../models/user/user");
 
 //User CRUD
-router.get("/users", adminAuthMiddleware, isAdmin, userCntrls.getAllUsers);
-router.get("/user/:id", adminAuthMiddleware, isAdmin, userCntrls.getUser);
+router.get("/users", authMiddleware, isAdmin, userCntrls.getAllUsers);
+router.get("/user/:id", authMiddleware, isAdmin, userCntrls.getUser);
 router.patch(
   "/update_user/:userId",
   userAuthMiddleware,

@@ -4,42 +4,42 @@ const { User } = require("../models/user/user");
 const { Admin } = require("../models/admin/admin");
 
 const authMiddlewares = {
-  userAuthMiddleware: async (req, res, next) => {
-    const { authorization } = req.headers;
+  // authMiddleware: async (req, res, next) => {
+  //   const { authorization } = req.headers;
 
-    if (!authorization)
-      return res.status(403).json({ error: "Invalid Authentication" });
+  //   if (!authorization)
+  //     return res.status(403).json({ error: "Invalid Authentication" });
 
-    const { id: userId } = jwt.verify(
-      authorization,
-      process.env.ACCESS_TOKEN_SECRET
-    );
+  //   const { id: userId } = jwt.verify(
+  //     authorization,
+  //     process.env.ACCESS_TOKEN_SECRET
+  //   );
 
-    const user = await User.findById(userId).select("-hash -salt");
-    if (!user)
-      return res.status(403).json({ error: "Invalid Authentication" });
+  //   const user = await User.findById(userId).select("-hash -salt");
+  //   if (!user) return res.status(403).json({ error: "Invalid Authentication" });
 
-    req.user = user;
+  //   req.user = user;
 
-    next();
-  },
-  adminAuthMiddleware: async (req, res, next) => {
+  //   next();
+  // },
+  authMiddleware: async (req, res, next) => {
     try {
       const { authorization } = req.headers;
 
       if (!authorization)
         return res.status(403).json({ error: "Invalid Authentication" });
 
-      const { id: adminId } = jwt.verify(
-        authorization,
-        process.env.ACCESS_TOKEN_SECRET
-      );
+      let { id } = jwt.verify(authorization, process.env.ACCESS_TOKEN_SECRET);
 
-      const admin = await Admin.findById(adminId).select("-hash -salt");
-      if (!admin)
+      let userOrAdmin = await Promise.any([
+        await Admin.findById(id),
+        await User.findById(id),
+      ]);
+
+      if (!userOrAdmin)
         return res.status(403).json({ error: "Invalid Authentication" });
 
-      req.user = admin;
+      req.user = userOrAdmin;
 
       next();
     } catch (error) {
@@ -47,6 +47,7 @@ const authMiddlewares = {
     }
   },
   isAdmin: async (req, res, next) => {
+    console.log(req.user, "isAdmin route");
     if (!req.user.isAdmin)
       return res
         .status(403)

@@ -24,7 +24,7 @@ const {
   deactivateUser,
   activateUser,
 } = require("../controllers/adminCntrls");
-const { adminAuthMiddleware, isAdmin } = require("../middleware/auth");
+const { authMiddleware, isAdmin } = require("../middleware/auth");
 const {
   validateAdminUpdate,
   validateCharges,
@@ -39,22 +39,17 @@ const { validateReward } = require("../models/transaction");
 //deactivate & activate user
 router.patch(
   "/deactivate_user/:userId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   deactivateUser
 );
-router.patch(
-  "/activate_user/:userId",
-  adminAuthMiddleware,
-  isAdmin,
-  activateUser
-);
+router.patch("/activate_user/:userId", authMiddleware, isAdmin, activateUser);
 
 //Admin and company info
-router.patch("/update_admin", adminAuthMiddleware, isAdmin, updateLoginDetails);
+router.patch("/update_admin", authMiddleware, isAdmin, updateLoginDetails);
 router.patch(
   "/update_company_info/:adminId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   validate(validateAdminUpdate),
   updateCompanyInfo
@@ -63,62 +58,57 @@ router.patch(
 //deposit plans
 router.get(
   "/get_deposit_plan/:depositPlanId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   getDepositPlan
 );
 router.get(
   "/get_deposit_plan_names",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   getDepositPlanNames
 );
-router.get("/get_deposit_plans", adminAuthMiddleware, isAdmin, getDepositPlans);
+router.get("/get_deposit_plans", authMiddleware, isAdmin, getDepositPlans);
 router.patch(
   "/get_deposit_plans/:depositPlanId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   validate(depositPlanValidationUpdate),
   updateDepositPlan
 );
 router.post(
   "/create_deposit_plan",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   validate(depositPlanValidationCreate),
   createDepositPlan
 );
 
 //FAQs
-router.get("/get_FAQ/:FAQId", adminAuthMiddleware, isAdmin, getFAQ);
-router.get("/get_FAQs", adminAuthMiddleware, isAdmin, getFAQs);
-router.patch("/update_FAQ/:FAQId", adminAuthMiddleware, isAdmin, updateFAQ);
-router.post("/create_FAQ", adminAuthMiddleware, isAdmin, createFAQ);
-router.delete("/delete_FAQ/:FAQId", adminAuthMiddleware, isAdmin, deleteFAQ);
+router.get("/get_FAQ/:FAQId", authMiddleware, isAdmin, getFAQ);
+router.get("/get_FAQs", authMiddleware, isAdmin, getFAQs);
+router.patch("/update_FAQ/:FAQId", authMiddleware, isAdmin, updateFAQ);
+router.post("/create_FAQ", authMiddleware, isAdmin, createFAQ);
+router.delete("/delete_FAQ/:FAQId", authMiddleware, isAdmin, deleteFAQ);
 
 //Testimonials
 router.get(
   "/get_testimonial/:testimonialId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   getTestimonial
 );
-router.get("/get_testimonials", adminAuthMiddleware, isAdmin, getTestimonials);
+router.get("/get_testimonials", authMiddleware, isAdmin, getTestimonials);
 router.patch(
   "/update_testimonial/:testimonialId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   updateTestimonial
 );
-router.post(
-  "/create_testimonial",
-  adminAuthMiddleware,
-  isAdmin,
-  createTestimonial
-);
+router.post("/create_testimonial", authMiddleware, isAdmin, createTestimonial);
 router.delete(
   "/delete_testimonial/:testimonialId",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   deleteTestimonial
 );
@@ -126,14 +116,14 @@ router.delete(
 //Send Bonus and Penalty
 router.post(
   "/send_bonus",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   validate(validateReward),
   sendBonus
 );
 router.post(
   "/send_penalty",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   validate(validateReward),
   sendPenalty
@@ -142,13 +132,13 @@ router.post(
 //Set Charges
 router.put(
   "/set_charges",
-  adminAuthMiddleware,
+  authMiddleware,
   isAdmin,
   validate(validateCharges),
   setCharges
 );
 
 //paginated
-router.get("/paginated", getPaginated);
+router.get("/paginated", authMiddleware, isAdmin, getPaginated);
 
 module.exports.adminRoutes = router;
